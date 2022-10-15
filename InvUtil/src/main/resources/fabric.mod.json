@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "invutil",
+  "version": "${version}",
+  "name": "InvUtil",
+  "description": "Mod Description",
+  "authors": [
+    "P1x3lc0w"
+  ],
+  "contact": {
+    "homepage": "https://example.com/",
+    "issues": "https://example.com/",
+    "sources": "https://example.com/"
+  },
+  "license": "GPL",
+  "icon": "assets/invutil/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [ ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "p1x3lc0w.invutil.KeybindEntrypoint"
+      }
+    ]
+  },
+  "mixins": [
+    "invutil.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.9",
+    "fabric-api": ">=0.62.0+1.19.2",
+    "fabric-language-kotlin": ">=1.8.4+kotlin.1.7.20",
+    "minecraft": ">=1.19",
+    "java": ">=17",
+    "fabric-key-binding-api-v1": "*"
+  }
+}
