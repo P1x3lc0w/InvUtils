@@ -12,7 +12,7 @@
     "issues": "https://github.com/P1x3lc0w/InvUtils/issues",
     "sources": "https://github.com/P1x3lc0w/InvUtils"
   },
-  "license": "GPL",
+  "license": "GNU GPL v3",
   "icon": "assets/invutil/icon.png",
   "environment": "*",
   "entrypoints": {
