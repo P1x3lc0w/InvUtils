@@ -16,7 +16,6 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.MiningToolItem
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.screen.slot.SlotActionType
-import net.minecraft.text.Text
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.HitResult
@@ -25,23 +24,23 @@ import org.lwjgl.glfw.GLFW
 
 class KeybindEntrypoint : ClientModInitializer {
     override fun onInitializeClient() {
-        var autoToolKeybind = KeyBindingHelper.registerKeyBinding(
+        val autoToolKeybind = KeyBindingHelper.registerKeyBinding(
             KeyBinding(
                 "key.p1x3lc0w.invutil.autoTool", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R, "p1x3lc0w.invutil.key"
             )
-        );
+        )
 
-        var swapSilkTouchKeybind = KeyBindingHelper.registerKeyBinding(
+        val swapSilkTouchKeybind = KeyBindingHelper.registerKeyBinding(
             KeyBinding(
                 "key.p1x3lc0w.invutil.swapSilkTouch", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, "p1x3lc0w.invutil.key"
             )
-        );
+        )
 
-        var swapElytraKeybind = KeyBindingHelper.registerKeyBinding(
+        val swapElytraKeybind = KeyBindingHelper.registerKeyBinding(
             KeyBinding(
                 "key.p1x3lc0w.invutil.swapElytra", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "p1x3lc0w.invutil.key"
             )
-        );
+        )
 
         ClientTickEvents.END_CLIENT_TICK.register(fun(client) {
             while (autoToolKeybind.wasPressed()) {
@@ -55,11 +54,10 @@ class KeybindEntrypoint : ClientModInitializer {
             while (swapElytraKeybind.wasPressed()) {
                 swapElytra(client)
             }
-        });
+        })
     }
 
-    companion object {
-        /*
+    companion object {/*
         * Player Screen slot layout
         * 0 crafting result
         * 1-4 crafting input
@@ -74,46 +72,44 @@ class KeybindEntrypoint : ClientModInitializer {
         * 40 offhand
         */
 
-        const val INVENTORY_CHEST_INDEX = 38;
-        const val SCREEN_HOTBAR_START = 36;
+        const val INVENTORY_CHEST_INDEX = 38
+        const val SCREEN_CHEST_INDEX = 6
+        //const val SCREEN_HOTBAR_START = 36
+
         val SCREEN_INVENTORY_RANGE = 9..35
-        val SCREEN_INVENTORY_AND_HOTBAR_RANGE = 9..45
+        //val SCREEN_INVENTORY_AND_HOTBAR_RANGE = 9..45
+
+        val HOTBAR_RANGE = 0..9
+        //val INVENTORY_RANGE = 10..35
+        val INVENTORY_AND_HOTBAR_RANGE = 0..35
         fun swapElytra(client: MinecraftClient) {
-            val currentChestItem = client.player!!.inventory.getStack(INVENTORY_CHEST_INDEX).item;
-            val screenItemIndex = if (currentChestItem is ElytraItem) {
-                client.player!!.currentScreenHandler.slots.indexOfFirstInRange(SCREEN_INVENTORY_AND_HOTBAR_RANGE,
-                    fun(slot): Boolean {
-                        val item = slot.stack.item
-                        return item is ArmorItem && item.slotType == EquipmentSlot.CHEST
-                    })
+            val currentChestItem = client.player!!.inventory.getStack(INVENTORY_CHEST_INDEX).item
+            val inventoryItemIndex = if (currentChestItem is ElytraItem) {
+                client.player!!.inventory.indexOfFirstInRange(INVENTORY_AND_HOTBAR_RANGE, fun(stack): Boolean {
+                    val item = stack.item
+                    return item is ArmorItem && item.slotType == EquipmentSlot.CHEST
+                })
             } else {
-                client.player!!.currentScreenHandler.slots.indexOfFirstInRange(SCREEN_INVENTORY_AND_HOTBAR_RANGE,
-                    fun(slot): Boolean {
-                        val item = slot.stack.item
-                        return item is ElytraItem
-                    })
+                client.player!!.inventory.indexOfFirstInRange(INVENTORY_AND_HOTBAR_RANGE, fun(stack): Boolean {
+                    val item = stack.item
+                    return item is ElytraItem
+                })
             }
 
-            if (screenItemIndex > 0) {
-                client.swapPlayerInventorySlots(screenItemIndex, INVENTORY_CHEST_INDEX);
+            if (inventoryItemIndex > 0) {
+                client.swapPlayerInventorySlots(SCREEN_CHEST_INDEX, inventoryItemIndex)
             }
         }
 
         fun swapSilkTouch(client: MinecraftClient) {
             val currentStack = client.player!!.inventory.getStack(client.player!!.inventory!!.selectedSlot)
-            val currentTool = currentStack.item;
+            val currentTool = currentStack.item
             if (currentTool is MiningToolItem) {
-                val screenItemIndex = client.player!!.currentScreenHandler.slots.indexOfFirstInRange(
-                    SCREEN_INVENTORY_AND_HOTBAR_RANGE,
-                    fun(slot): Boolean {
-                        if (slot.stack == currentStack) return false
-                        val item = slot.stack.item
-                        return item is MiningToolItem && currentTool.javaClass == slot.stack.item.javaClass && slot.stack.hasSilkTouch() != currentStack.hasSilkTouch()
-                    })
-
-                if (screenItemIndex > 0) {
-                    client.swapPlayerInventorySlots(screenItemIndex, client.player!!.inventory!!.selectedSlot)
-                }
+                findAndSwapTo(client, fun(stack): Boolean {
+                    if (stack == currentStack) return false
+                    val item = stack.item
+                    return item is MiningToolItem && currentTool.javaClass == stack.item.javaClass && stack.hasSilkTouch() != currentStack.hasSilkTouch()
+                })
             }
         }
 
@@ -121,26 +117,43 @@ class KeybindEntrypoint : ClientModInitializer {
             val entity = client.getCameraEntity()
             val blockHit = entity?.raycast(20.0, 0.0f, false)
             if (blockHit != null && blockHit.type == HitResult.Type.BLOCK && blockHit is BlockHitResult) {
-                var blockState: BlockState? = client.world!!.getBlockState(blockHit.blockPos)
+                val blockState: BlockState? = client.world!!.getBlockState(blockHit.blockPos)
 
-                var screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(
-                    SCREEN_INVENTORY_RANGE,
-                    fun(slot): Boolean {
-                        val item = slot.stack.item;
-                        return item is MiningToolItem && item.isSuitableFor(blockState);
-                    })
+                findAndSwapTo(client, fun(stack): Boolean {
+                    val item = stack.item
+                    return item is MiningToolItem && item.isSuitableFor(blockState)
+                })
+            }
+        }
 
-                if (screenItemIndex >= 0) {
-                    client.swapPlayerInventorySlots(screenItemIndex, client.player!!.inventory!!.selectedSlot)
-                }
+        fun findAndSwapTo(client: MinecraftClient, predicate: (itemStack: ItemStack) -> Boolean) {
+            val selectedIndex = client.player!!.inventory!!.selectedSlot
+            val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
+
+            val hotbarIndex = client.player!!.inventory.indexOfFirstInRange(HOTBAR_RANGE, fun(stack): Boolean {
+                return stack != selectedStack && predicate(stack)
+            })
+
+            if (hotbarIndex >= 0) {
+                client.player!!.inventory!!.selectedSlot = hotbarIndex
+                return
+            }
+
+            val screenItemIndex =
+                client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(SCREEN_INVENTORY_RANGE,
+                    fun(slot): Boolean { return predicate(slot.stack) })
+
+            if (screenItemIndex >= 0) {
+                client.swapPlayerInventorySlots(screenItemIndex, selectedIndex)
             }
         }
     }
 }
 
 fun PlayerInventory.indexOfFirstInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Boolean): Int {
+    val combined = main + armor + offHand
     for (i in range) {
-        if (predicate(main[i])) return i
+        if (predicate(combined[i])) return i
     }
 
     return -1
@@ -148,7 +161,7 @@ fun PlayerInventory.indexOfFirstInRange(range: IntRange, predicate: (itemStack: 
 
 fun <T> DefaultedList<T>.indexOfFirstInRange(range: IntRange, predicate: (item: T) -> Boolean): Int {
     for (i in range) {
-        if (predicate(this[i])) return i;
+        if (predicate(this[i])) return i
     }
 
     return -1
@@ -166,5 +179,4 @@ fun ItemStack.hasSilkTouch(): Boolean {
     return enchantments.any {
         EnchantmentHelper.getIdFromNbt(it as NbtCompound?).toString().equals("minecraft:silk_touch")
     }
-
 }
