@@ -79,8 +79,8 @@ class KeybindEntrypoint : ClientModInitializer {
         val SCREEN_INVENTORY_RANGE = 9..35
         //val SCREEN_INVENTORY_AND_HOTBAR_RANGE = 9..45
 
-        val HOTBAR_RANGE = 0..9
-        //val INVENTORY_RANGE = 10..35
+        val HOTBAR_RANGE = 0..8
+        //val INVENTORY_RANGE = 9..35
         val INVENTORY_AND_HOTBAR_RANGE = 0..35
         fun swapElytra(client: MinecraftClient) {
             val currentChestItem = client.player!!.inventory.getStack(INVENTORY_CHEST_INDEX).item
