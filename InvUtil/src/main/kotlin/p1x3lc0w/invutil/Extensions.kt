@@ -33,7 +33,7 @@ fun PlayerInventory.indexOfHighestInRange(range: IntRange, predicate: (itemStack
     for (i in range) {
         val value = predicate(combined[i])
 
-        if (value > 0 && value > highest) {
+        if (value >= 0 && value > highest) {
             indexOfHighest = i
             highest = value
         }
@@ -58,6 +58,20 @@ fun <T> DefaultedList<T>.indexOfHighestInRange(range: IntRange, predicate: (item
     return indexOfHighest
 }
 
+/*
+* Player Screen slot layout
+* 0 crafting result
+* 1-4 crafting input
+* 5-8 Equipment
+* 9-35 inventory
+* 36-44 hotbar
+* 45 offhand
+*
+* Player combined inventory layout
+* 0-35 inventory
+* 36-39 armor
+* 40 offhand
+*/
 //NOTE: Source id is from screen slots (see above), while destination id is from combined inventory (see above)
 fun MinecraftClient.swapPlayerInventorySlots(source: Int, destination: Int) {
     //player?.sendMessage(Text.literal("SWAP: ${source}; $destination"))

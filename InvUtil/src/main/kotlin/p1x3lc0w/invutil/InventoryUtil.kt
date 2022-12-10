@@ -12,7 +12,8 @@ import net.minecraft.util.hit.HitResult
 import p1x3lc0w.invutil.config.Config
 
 class InventoryUtil {
-    companion object {/*
+    companion object {
+        /*
         * Player Screen slot layout
         * 0 crafting result
         * 1-4 crafting input
