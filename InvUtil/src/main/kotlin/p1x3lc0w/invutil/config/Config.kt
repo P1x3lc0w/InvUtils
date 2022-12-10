@@ -7,8 +7,8 @@ class Config {
         fun getConfig(): IInvUtilConfig {
             val fabricLoader: FabricLoader = FabricLoader.getInstance()
             if (
-                fabricLoader.isModLoaded("cloth-config-fabric") &&
-                fabricLoader.isModLoaded("mod-menu")
+                fabricLoader.isModLoaded("cloth-config") &&
+                fabricLoader.isModLoaded("modmenu")
             ) {
                 return p1x3lc0w.invutil.optional.clothconfig.ClothConfigUtil.getConfig()
             }

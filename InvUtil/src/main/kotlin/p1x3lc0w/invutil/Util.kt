@@ -25,6 +25,39 @@ fun <T> DefaultedList<T>.indexOfFirstInRange(range: IntRange, predicate: (item: 
     return -1
 }
 
+fun PlayerInventory.indexOfHighestInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Int): Int {
+    val combined = main + armor + offHand
+    var indexOfHighest = -1
+    var highest = Int.MIN_VALUE
+
+    for (i in range) {
+        val value = predicate(combined[i])
+
+        if(value > 0 && value > highest) {
+            indexOfHighest = i
+            highest = value
+        }
+    }
+
+    return indexOfHighest
+}
+
+fun <T> DefaultedList<T>.indexOfHighestInRange(range: IntRange, predicate: (item: T) -> Int): Int {
+    var indexOfHighest = -1
+    var highest = Int.MIN_VALUE
+
+    for (i in range) {
+        val value = predicate(this[i])
+
+        if(value > 0 && value > highest) {
+            indexOfHighest = i
+            highest = value
+        }
+    }
+
+    return indexOfHighest
+}
+
 //NOTE: Source id is from screen slots (see above), while destination id is from combined inventory (see above)
 fun MinecraftClient.swapPlayerInventorySlots(source: Int, destination: Int) {
     //player?.sendMessage(Text.literal("SWAP: ${source}; $destination"))

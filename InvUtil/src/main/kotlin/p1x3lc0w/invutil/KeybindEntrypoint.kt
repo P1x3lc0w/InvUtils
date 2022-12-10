@@ -15,6 +15,7 @@ import net.minecraft.item.MiningToolItem
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.HitResult
 import org.lwjgl.glfw.GLFW
+import p1x3lc0w.invutil.config.Config
 
 class KeybindEntrypoint : ClientModInitializer {
     override fun onInitializeClient() {
@@ -110,15 +111,29 @@ class KeybindEntrypoint : ClientModInitializer {
         }
 
         fun autoTool(client: MinecraftClient) {
+            val config = Config.getConfig()
+
             val entity = client.getCameraEntity()
             val blockHit = entity?.raycast(20.0, 0.0f, false)
+
             if (blockHit != null && blockHit.type == HitResult.Type.BLOCK && blockHit is BlockHitResult) {
                 val blockState: BlockState? = client.world!!.getBlockState(blockHit.blockPos)
 
-                findAndSwapTo(client, fun(stack): Boolean {
-                    val item = stack.item
-                    return item is MiningToolItem && item.isSuitableFor(blockState)
-                })
+                if(config.autoToolConfig.prioritizeHigherMiningLevelTools) {
+                    findAndSwapToHighest(client, fun(stack): Int {
+                        val item = stack.item
+                        if(item is MiningToolItem && item.isSuitableFor(blockState)) {
+                            return item.material.miningLevel
+                        }
+
+                        return -1
+                    })
+                } else {
+                    findAndSwapTo(client, fun(stack): Boolean {
+                        val item = stack.item
+                        return item is MiningToolItem && item.isSuitableFor(blockState)
+                    })
+                }
             }
         }
 
@@ -138,6 +153,31 @@ class KeybindEntrypoint : ClientModInitializer {
             val screenItemIndex =
                 client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(SCREEN_INVENTORY_RANGE,
                     fun(slot): Boolean { return predicate(slot.stack) })
+
+            if (screenItemIndex >= 0) {
+                client.swapPlayerInventorySlots(screenItemIndex, selectedIndex)
+            }
+        }
+
+        fun findAndSwapToHighest(client: MinecraftClient, predicate: (itemStack: ItemStack) -> Int) {
+            val selectedIndex = client.player!!.inventory!!.selectedSlot
+            val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
+
+            val hotbarIndex = client.player!!.inventory.indexOfHighestInRange(HOTBAR_RANGE, fun(stack): Int {
+                if(stack == selectedStack)
+                    return -1
+
+                return predicate(stack)
+            })
+
+            if (hotbarIndex >= 0) {
+                client.player!!.inventory!!.selectedSlot = hotbarIndex
+                return
+            }
+
+            val screenItemIndex =
+                client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(SCREEN_INVENTORY_RANGE,
+                    fun(slot): Int { return predicate(slot.stack) })
 
             if (screenItemIndex >= 0) {
                 client.swapPlayerInventorySlots(screenItemIndex, selectedIndex)
