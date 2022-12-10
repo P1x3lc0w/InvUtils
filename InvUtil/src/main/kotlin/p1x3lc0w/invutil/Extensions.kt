@@ -6,18 +6,13 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.screen.slot.SlotActionType
-import net.minecraft.util.collection.DefaultedList
 
 fun PlayerInventory.indexOfFirstInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Boolean): Int {
     val combined = main + armor + offHand
-    for (i in range) {
-        if (predicate(combined[i])) return i
-    }
-
-    return -1
+    return combined.indexOfFirstInRange(range, predicate)
 }
 
-fun <T> DefaultedList<T>.indexOfFirstInRange(range: IntRange, predicate: (item: T) -> Boolean): Int {
+fun <T> List<T>.indexOfFirstInRange(range: IntRange, predicate: (item: T) -> Boolean): Int {
     for (i in range) {
         if (predicate(this[i])) return i
     }
@@ -27,29 +22,17 @@ fun <T> DefaultedList<T>.indexOfFirstInRange(range: IntRange, predicate: (item: 
 
 fun PlayerInventory.indexOfHighestInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Int): Int {
     val combined = main + armor + offHand
-    var indexOfHighest = -1
-    var highest = Int.MIN_VALUE
-
-    for (i in range) {
-        val value = predicate(combined[i])
-
-        if (value >= 0 && value > highest) {
-            indexOfHighest = i
-            highest = value
-        }
-    }
-
-    return indexOfHighest
+    return combined.indexOfHighestInRange(range, predicate)
 }
 
-fun <T> DefaultedList<T>.indexOfHighestInRange(range: IntRange, predicate: (item: T) -> Int): Int {
+fun <T> List<T>.indexOfHighestInRange(range: IntRange, predicate: (item: T) -> Int): Int {
     var indexOfHighest = -1
     var highest = Int.MIN_VALUE
 
     for (i in range) {
         val value = predicate(this[i])
 
-        if (value > 0 && value > highest) {
+        if (value >= 0 && value > highest) {
             indexOfHighest = i
             highest = value
         }

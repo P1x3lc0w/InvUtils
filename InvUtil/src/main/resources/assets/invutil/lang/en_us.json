@@ -1,10 +1,11 @@
 {
-  "p1x3lc0w.invutil.key": "InvUtil",
+  "p1x3lc0w.invutil.key": "InvUtils",
   "key.p1x3lc0w.invutil.autoTool": "Auto Tool",
   "key.p1x3lc0w.invutil.swapSilkTouch": "Swap Silk Touch",
   "key.p1x3lc0w.invutil.swapElytra": "Swap Elytra",
-  "text.autoconfig.p1x3lc0w.invutil.title": "InvUtil Configuration Options",
+  "text.autoconfig.p1x3lc0w.invutil.title": "InvUtils Configuration Options",
   "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.@PrefixText": "Auto Tool",
   "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.prioritizeHigherMiningLevelTools": "Prioritize tools by mining level",
-  "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.glassSilkTouch": "Swap to Silk Touch tool for glass"
+  "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.glassSilkTouch": "Swap to Silk Touch tool for glass",
+  "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.targetSlot": "Target slot"
 }

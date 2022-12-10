@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.MiningToolItem
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.HitResult
+import p1x3lc0w.invutil.config.AutoToolTargetSlot
 import p1x3lc0w.invutil.config.Config
 
 class InventoryUtil {
@@ -30,10 +31,10 @@ class InventoryUtil {
 
         const val INVENTORY_CHEST_INDEX = 38
         const val SCREEN_CHEST_INDEX = 6
-        //const val SCREEN_HOTBAR_START = 36
+        const val SCREEN_HOTBAR_START = 36
 
         val SCREEN_INVENTORY_RANGE = 9..35
-        //val SCREEN_INVENTORY_AND_HOTBAR_RANGE = 9..45
+        val SCREEN_INVENTORY_AND_HOTBAR_RANGE = 9..45
 
         val HOTBAR_RANGE = 0..8
 
@@ -159,21 +160,17 @@ class InventoryUtil {
             val selectedIndex = client.player!!.inventory!!.selectedSlot
             val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
 
-            val hotbarIndex = client.player!!.inventory.indexOfFirstInRange(HOTBAR_RANGE, fun(stack): Boolean {
-                return stack != selectedStack && predicate(stack)
-            })
-
-            if (hotbarIndex >= 0) {
-                client.player!!.inventory!!.selectedSlot = hotbarIndex
-                return
-            }
-
-            val screenItemIndex =
-                client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(SCREEN_INVENTORY_RANGE,
-                    fun(slot): Boolean { return predicate(slot.stack) })
+            val screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(
+                SCREEN_INVENTORY_AND_HOTBAR_RANGE, fun(slot): Boolean {
+                    return slot.stack != selectedStack && predicate(slot.stack)
+                })
 
             if (screenItemIndex >= 0) {
-                client.swapPlayerInventorySlots(screenItemIndex, selectedIndex)
+                swapTo(
+                    client,
+                    getHotbarSlotOffset(client, Config.getConfig().autoToolConfig.targetSlot),
+                    screenItemIndex
+                )
             }
         }
 
@@ -181,24 +178,50 @@ class InventoryUtil {
             val selectedIndex = client.player!!.inventory!!.selectedSlot
             val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
 
-            val hotbarIndex = client.player!!.inventory.indexOfHighestInRange(HOTBAR_RANGE, fun(stack): Int {
-                if (stack == selectedStack)
-                    return -1
+            val screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(
+                SCREEN_INVENTORY_AND_HOTBAR_RANGE,
+                fun(slot): Int {
+                    if (slot.stack == selectedStack)
+                        return -1
 
-                return predicate(stack)
-            })
-
-            if (hotbarIndex >= 0) {
-                client.player!!.inventory!!.selectedSlot = hotbarIndex
-                return
-            }
-
-            val screenItemIndex =
-                client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(SCREEN_INVENTORY_RANGE,
-                    fun(slot): Int { return predicate(slot.stack) })
+                    return predicate(slot.stack)
+                })
 
             if (screenItemIndex >= 0) {
-                client.swapPlayerInventorySlots(screenItemIndex, selectedIndex)
+                swapTo(
+                    client,
+                    getHotbarSlotOffset(client, Config.getConfig().autoToolConfig.targetSlot),
+                    screenItemIndex
+                )
+            }
+        }
+
+        fun swapTo(client: MinecraftClient, targetSlot: Int, screenItemIndex: Int) {
+            if (targetSlot != SCREEN_HOTBAR_START + screenItemIndex) {
+                client.swapPlayerInventorySlots(screenItemIndex, targetSlot)
+            }
+
+            client.player!!.inventory!!.selectedSlot = targetSlot
+        }
+
+        fun getHotbarSlotOffset(client: MinecraftClient, target: AutoToolTargetSlot): Int {
+            return when (target) {
+                AutoToolTargetSlot.Selected -> client.player!!.inventory!!.selectedSlot
+                AutoToolTargetSlot.FirstTool -> client.player!!.inventory!!.indexOfFirstInRange(
+                    HOTBAR_RANGE,
+                    fun(stack): Boolean {
+                        return stack.item is MiningToolItem
+                    })
+
+                AutoToolTargetSlot.Slot0 -> 0
+                AutoToolTargetSlot.Slot1 -> 1
+                AutoToolTargetSlot.Slot2 -> 2
+                AutoToolTargetSlot.Slot3 -> 3
+                AutoToolTargetSlot.Slot4 -> 4
+                AutoToolTargetSlot.Slot5 -> 5
+                AutoToolTargetSlot.Slot6 -> 6
+                AutoToolTargetSlot.Slot7 -> 7
+                AutoToolTargetSlot.Slot8 -> 8
             }
         }
     }

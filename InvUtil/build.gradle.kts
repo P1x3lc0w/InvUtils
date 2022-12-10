@@ -18,7 +18,7 @@ dependencies {
     modApi("me.shedaniel.cloth", "cloth-config-fabric", project.extra["cloth_config_version"] as String) {
         exclude("net.fabricmc.fabric-api")
     }
-    modApi("com.terraformersmc", "modmenu", "5.0.1")
+    modApi("com.terraformersmc", "modmenu", project.extra["modmenu_version"] as String)
 }
 tasks {
     val javaVersion = JavaVersion.VERSION_17

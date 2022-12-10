@@ -28,6 +28,9 @@ class ClothConfigUtil {
         }
 
         private fun registerConfig() {
+            val registry = AutoConfig.getGuiRegistry(InvUtilClothConfigData::class.java)
+            registry.registerPredicateTransformer(DropdownTransformer()) { true }
+
             AutoConfig.register(InvUtilClothConfigData::class.java) { definition: Config?, configClass: Class<InvUtilClothConfigData?>? ->
                 Toml4jConfigSerializer(definition, configClass)
             }
