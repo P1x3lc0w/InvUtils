@@ -171,8 +171,7 @@ class KeybindEntrypoint : ClientModInitializer {
             if (blockHit != null && blockHit.type == HitResult.Type.BLOCK && blockHit is BlockHitResult) {
                 val blockState: BlockState = client.world!!.getBlockState(blockHit.blockPos) ?: return
 
-                if (
-                    config.autoToolConfig.glassSilkTouch && (blockState.isIn(Tags.GLASS_BLOCKS) || blockState.isIn(Tags.GLASS_PANES))) {
+                if (config.autoToolConfig.glassSilkTouch && BlockUtil.isGlass(blockState.block)) {
                     swapSilkTouch(client, false)
                     return
                 }
