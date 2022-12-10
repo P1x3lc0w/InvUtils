@@ -98,15 +98,67 @@ class KeybindEntrypoint : ClientModInitializer {
             }
         }
 
-        fun swapSilkTouch(client: MinecraftClient) {
+        fun swapSilkTouch(client: MinecraftClient, matchToolType: Boolean = true) {
+            val config = Config.getConfig()
+
             val currentStack = client.player!!.inventory.getStack(client.player!!.inventory!!.selectedSlot)
-            val currentTool = currentStack.item
-            if (currentTool is MiningToolItem) {
-                findAndSwapTo(client, fun(stack): Boolean {
-                    if (stack == currentStack) return false
+
+            if (config.autoToolConfig.prioritizeHigherMiningLevelTools) {
+                findAndSwapToHighest(client, fun(stack): Int {
                     val item = stack.item
-                    return item is MiningToolItem && currentTool.javaClass == stack.item.javaClass && stack.hasSilkTouch() != currentStack.hasSilkTouch()
+                    // Item is not a tool -> not a match.
+                    if (item !is MiningToolItem) return -1
+
+                    return if (isSuitableSilkTouchItemStack(
+                            stack,
+                            currentStack,
+                            matchToolType
+                        )
+                    ) item.material.miningLevel else -1
                 })
+            } else {
+                findAndSwapTo(client, fun(stack): Boolean {
+                    return isSuitableSilkTouchItemStack(stack, currentStack, matchToolType)
+                })
+            }
+        }
+
+        private fun isSuitableSilkTouchItemStack(
+            stack: ItemStack,
+            currentStack: ItemStack,
+            matchToolType: Boolean
+        ): Boolean {
+            val currentTool = currentStack.item
+            if (stack == currentStack) return false
+
+            val item = stack.item
+            // Item is not a tool -> not a match.
+            if (item !is MiningToolItem) return false
+
+            if (currentTool is MiningToolItem) {
+                //We are currently holding a tool.
+
+                //If matchToolType is true, check if the item is the same tool as the one we are holding,
+                if (matchToolType && currentTool.javaClass != stack.item.javaClass)
+                    return false
+
+                //We want to swap from Silk Touch to non-Silk Touch and vice versa.
+                if (matchToolType && stack.hasSilkTouch() == currentStack.hasSilkTouch())
+                    return false
+
+                if((!matchToolType) && (!stack.hasSilkTouch()))
+                    return false
+
+                return true
+            } else {
+                //We are currently not holding a tool, so no match if matchToolType is true.
+                if (matchToolType)
+                    return false
+
+                if(!stack.hasSilkTouch())
+                    return false
+
+                return true
             }
         }
 
@@ -117,12 +169,18 @@ class KeybindEntrypoint : ClientModInitializer {
             val blockHit = entity?.raycast(20.0, 0.0f, false)
 
             if (blockHit != null && blockHit.type == HitResult.Type.BLOCK && blockHit is BlockHitResult) {
-                val blockState: BlockState? = client.world!!.getBlockState(blockHit.blockPos)
+                val blockState: BlockState = client.world!!.getBlockState(blockHit.blockPos) ?: return
 
-                if(config.autoToolConfig.prioritizeHigherMiningLevelTools) {
+                if (
+                    config.autoToolConfig.glassSilkTouch && (blockState.isIn(Tags.GLASS_BLOCKS) || blockState.isIn(Tags.GLASS_PANES))) {
+                    swapSilkTouch(client, false)
+                    return
+                }
+
+                if (config.autoToolConfig.prioritizeHigherMiningLevelTools) {
                     findAndSwapToHighest(client, fun(stack): Int {
                         val item = stack.item
-                        if(item is MiningToolItem && item.isSuitableFor(blockState)) {
+                        if (item is MiningToolItem && item.isSuitableFor(blockState)) {
                             return item.material.miningLevel
                         }
 
@@ -164,7 +222,7 @@ class KeybindEntrypoint : ClientModInitializer {
             val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
 
             val hotbarIndex = client.player!!.inventory.indexOfHighestInRange(HOTBAR_RANGE, fun(stack): Int {
-                if(stack == selectedStack)
+                if (stack == selectedStack)
                     return -1
 
                 return predicate(stack)
