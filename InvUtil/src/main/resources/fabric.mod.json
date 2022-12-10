@@ -22,6 +22,9 @@
         "adapter": "kotlin",
         "value": "p1x3lc0w.invutil.KeybindEntrypoint"
       }
+    ],
+    "modmenu": [
+       "p1x3lc0w.invutil.optional.clothconfig.ModMenuIntegrationEntrypoint"
     ]
   },
   "mixins": [

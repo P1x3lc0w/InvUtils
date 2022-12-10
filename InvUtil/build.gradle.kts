@@ -5,13 +5,20 @@ plugins {
 base { archivesName.set(project.extra["archives_base_name"] as String) }
 version = "${project.extra["mod_version"] as String}+mc${project.extra["minecraft_version"] as String}"
 group = project.extra["maven_group"] as String
-repositories {}
+repositories {
+    maven("https://maven.shedaniel.me")
+    maven("https://maven.terraformersmc.com/releases/")
+}
 dependencies {
     minecraft("com.mojang", "minecraft", project.extra["minecraft_version"] as String)
     mappings("net.fabricmc", "yarn", project.extra["yarn_mappings"] as String, null, "v2")
     modImplementation("net.fabricmc", "fabric-loader", project.extra["loader_version"] as String)
     modImplementation("net.fabricmc.fabric-api", "fabric-api", project.extra["fabric_version"] as String)
     modImplementation("net.fabricmc", "fabric-language-kotlin", project.extra["fabric_language_kotlin_version"] as String)
+    modApi("me.shedaniel.cloth", "cloth-config-fabric", project.extra["cloth_config_version"] as String) {
+        exclude("net.fabricmc.fabric-api")
+    }
+    modApi("com.terraformersmc", "modmenu", "5.0.1")
 }
 tasks {
     val javaVersion = JavaVersion.VERSION_17
