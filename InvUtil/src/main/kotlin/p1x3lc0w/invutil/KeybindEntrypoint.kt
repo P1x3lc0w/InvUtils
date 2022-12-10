@@ -16,7 +16,6 @@ import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.HitResult
 import org.lwjgl.glfw.GLFW
 
-
 class KeybindEntrypoint : ClientModInitializer {
     override fun onInitializeClient() {
         val autoToolKeybind = KeyBindingHelper.registerKeyBinding(
@@ -75,6 +74,7 @@ class KeybindEntrypoint : ClientModInitializer {
         //val SCREEN_INVENTORY_AND_HOTBAR_RANGE = 9..45
 
         val HOTBAR_RANGE = 0..8
+
         //val INVENTORY_RANGE = 9..35
         val INVENTORY_AND_HOTBAR_RANGE = 0..35
 
