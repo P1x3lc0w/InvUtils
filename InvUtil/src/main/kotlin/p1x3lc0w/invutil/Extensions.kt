@@ -33,7 +33,7 @@ fun PlayerInventory.indexOfHighestInRange(range: IntRange, predicate: (itemStack
     for (i in range) {
         val value = predicate(combined[i])
 
-        if(value > 0 && value > highest) {
+        if (value > 0 && value > highest) {
             indexOfHighest = i
             highest = value
         }
@@ -49,7 +49,7 @@ fun <T> DefaultedList<T>.indexOfHighestInRange(range: IntRange, predicate: (item
     for (i in range) {
         val value = predicate(this[i])
 
-        if(value > 0 && value > highest) {
+        if (value > 0 && value > highest) {
             indexOfHighest = i
             highest = value
         }
@@ -68,6 +68,6 @@ fun MinecraftClient.swapPlayerInventorySlots(source: Int, destination: Int) {
 
 fun ItemStack.hasSilkTouch(): Boolean {
     return enchantments.any {
-        EnchantmentHelper.getIdFromNbt(it as NbtCompound?).toString().equals("minecraft:silk_touch")
+        EnchantmentHelper.getIdFromNbt(it as NbtCompound?).toString() == "minecraft:silk_touch"
     }
 }
