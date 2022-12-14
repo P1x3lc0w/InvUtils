@@ -7,17 +7,17 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.screen.slot.SlotActionType
 
-fun PlayerInventory.indexOfFirstInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Boolean): Int {
+fun PlayerInventory.indexOfFirstInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Boolean, defaultValue: Int = -1): Int {
     val combined = main + armor + offHand
-    return combined.indexOfFirstInRange(range, predicate)
+    return combined.indexOfFirstInRange(range, predicate, defaultValue)
 }
 
-fun <T> List<T>.indexOfFirstInRange(range: IntRange, predicate: (item: T) -> Boolean): Int {
+fun <T> List<T>.indexOfFirstInRange(range: IntRange, predicate: (item: T) -> Boolean, defaultValue: Int = -1): Int {
     for (i in range) {
         if (predicate(this[i])) return i
     }
 
-    return -1
+    return defaultValue
 }
 
 fun PlayerInventory.indexOfHighestInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Int): Int {

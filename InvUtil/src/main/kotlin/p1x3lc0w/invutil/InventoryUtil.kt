@@ -211,8 +211,9 @@ class InventoryUtil {
                     HOTBAR_RANGE,
                     fun(stack): Boolean {
                         return stack.item is MiningToolItem
-                    })
-
+                    },
+                    client.player!!.inventory!!.selectedSlot
+                )
                 AutoToolTargetSlot.Slot0 -> 0
                 AutoToolTargetSlot.Slot1 -> 1
                 AutoToolTargetSlot.Slot2 -> 2
