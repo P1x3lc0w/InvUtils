@@ -8,3 +8,6 @@ A Minecraft clientside inventory utilities mod
 - Swap main hand item with tool appropriate for focused block
 - Swap chestplate/Elytra
 - Swap tool with (non-) Silk Touch version
+
+# Configuration
+This mod supports Configuration with [Mod Menu](https://github.com/TerraformersMC/ModMenu) and [Cloth Config API](https://github.com/shedaniel/cloth-config) installed
