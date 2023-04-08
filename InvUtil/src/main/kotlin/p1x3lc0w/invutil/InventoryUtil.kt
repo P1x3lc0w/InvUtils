@@ -163,9 +163,9 @@ class InventoryUtil {
         fun findAndSwapTo(client: MinecraftClient, predicate: (itemStack: ItemStack) -> Boolean) {
             val config = Config.getConfig()
             val selectedIndex = client.player!!.inventory!!.selectedSlot
-            val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
+            //val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
 
-            var screenItemIndex = -1;
+            var screenItemIndex = -1
 
             if(config.autoToolConfig.searchHotbarFirst) {
                 screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(
@@ -194,7 +194,7 @@ class InventoryUtil {
             val selectedIndex = client.player!!.inventory!!.selectedSlot
             val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
 
-            var screenItemIndex = -1;
+            var screenItemIndex = -1
 
             if(config.autoToolConfig.searchHotbarFirst) {
                 screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(
