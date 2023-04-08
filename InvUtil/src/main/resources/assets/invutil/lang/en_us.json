@@ -7,5 +7,7 @@
   "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.@PrefixText": "Auto Tool",
   "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.prioritizeHigherMiningLevelTools": "Prioritize tools by mining level",
   "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.glassSilkTouch": "Swap to Silk Touch tool for glass",
-  "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.targetSlot": "Target slot"
+  "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.enderChestSilkTouch": "Swap to Silk Touch tool for ender chests",
+  "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.targetSlot": "Target slot",
+  "text.autoconfig.p1x3lc0w.invutil.option.autoToolConfig.searchHotbarFirst": "Search Hotbar first"
 }

@@ -43,8 +43,16 @@ class BlockUtil {
             "minecraft:pink_stained_glass_pane"
         )
 
+        val ENDER_CHEST_BLOCKS: Set<String> = setOf(
+            "minecraft:ender_chest"
+        )
+
         fun isGlass(block: Block): Boolean {
             return GLASS_BLOCKS.contains(Registries.BLOCK.getId(block).toString())
+        }
+
+        fun isEnderChest(block: Block): Boolean {
+            return ENDER_CHEST_BLOCKS.contains(Registries.BLOCK.getId(block).toString())
         }
     }
 }

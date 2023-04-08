@@ -35,6 +35,7 @@ class InventoryUtil {
 
         val SCREEN_INVENTORY_RANGE = 9..35
         val SCREEN_INVENTORY_AND_HOTBAR_RANGE = 9..45
+        val SCREEN_HOTBAR_RANGE = 36..44
 
         val HOTBAR_RANGE = 0..8
 
@@ -133,7 +134,10 @@ class InventoryUtil {
             if (blockHit != null && blockHit.type == HitResult.Type.BLOCK && blockHit is BlockHitResult) {
                 val blockState: BlockState = client.world!!.getBlockState(blockHit.blockPos) ?: return
 
-                if (config.autoToolConfig.glassSilkTouch && BlockUtil.isGlass(blockState.block)) {
+                if (
+                    (config.autoToolConfig.glassSilkTouch && BlockUtil.isGlass(blockState.block)) ||
+                    (config.autoToolConfig.enderChestSilkTouch && BlockUtil.isEnderChest(blockState.block))
+                    ) {
                     swapSilkTouch(client, false)
                     return
                 }
@@ -157,13 +161,24 @@ class InventoryUtil {
         }
 
         fun findAndSwapTo(client: MinecraftClient, predicate: (itemStack: ItemStack) -> Boolean) {
+            val config = Config.getConfig()
             val selectedIndex = client.player!!.inventory!!.selectedSlot
             val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
 
-            val screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(
-                SCREEN_INVENTORY_AND_HOTBAR_RANGE, fun(slot): Boolean {
-                    return slot.stack != selectedStack && predicate(slot.stack)
-                })
+            var screenItemIndex = -1;
+
+            if(config.autoToolConfig.searchHotbarFirst) {
+                screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(
+                    SCREEN_HOTBAR_RANGE, fun(slot): Boolean {
+                        return predicate(slot.stack)
+                    })
+            }
+
+            if(screenItemIndex == -1)
+                screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfFirstInRange(
+                    SCREEN_INVENTORY_AND_HOTBAR_RANGE, fun(slot): Boolean {
+                        return predicate(slot.stack)
+                    })
 
             if (screenItemIndex >= 0) {
                 swapTo(
@@ -175,17 +190,32 @@ class InventoryUtil {
         }
 
         fun findAndSwapToHighest(client: MinecraftClient, predicate: (itemStack: ItemStack) -> Int) {
+            val config = Config.getConfig()
             val selectedIndex = client.player!!.inventory!!.selectedSlot
             val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
 
-            val screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(
-                SCREEN_INVENTORY_AND_HOTBAR_RANGE,
-                fun(slot): Int {
-                    if (slot.stack == selectedStack)
-                        return -1
+            var screenItemIndex = -1;
 
-                    return predicate(slot.stack)
-                })
+            if(config.autoToolConfig.searchHotbarFirst) {
+                screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(
+                    SCREEN_HOTBAR_RANGE,
+                    fun(slot): Int {
+                        if (slot.stack == selectedStack)
+                            return -1
+
+                        return predicate(slot.stack)
+                    })
+            }
+
+            if(screenItemIndex == -1)
+                screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(
+                    SCREEN_INVENTORY_AND_HOTBAR_RANGE,
+                    fun(slot): Int {
+                        if (slot.stack == selectedStack)
+                            return -1
+
+                        return predicate(slot.stack)
+                    })
 
             if (screenItemIndex >= 0) {
                 swapTo(
