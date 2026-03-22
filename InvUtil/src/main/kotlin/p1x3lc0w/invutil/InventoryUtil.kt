@@ -2,11 +2,11 @@ package p1x3lc0w.invutil
 
 import net.minecraft.block.BlockState
 import net.minecraft.client.MinecraftClient
+import net.minecraft.component.DataComponentTypes
+import net.minecraft.component.type.ToolComponent
 import net.minecraft.entity.EquipmentSlot
-import net.minecraft.item.ArmorItem
-import net.minecraft.item.ElytraItem
 import net.minecraft.item.ItemStack
-import net.minecraft.item.MiningToolItem
+import net.minecraft.text.Text
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.HitResult
 import p1x3lc0w.invutil.config.AutoToolTargetSlot
@@ -43,16 +43,17 @@ class InventoryUtil {
         val INVENTORY_AND_HOTBAR_RANGE = 0..35
 
         fun swapElytra(client: MinecraftClient) {
-            val currentChestItem = client.player!!.inventory.getStack(INVENTORY_CHEST_INDEX).item
-            val inventoryItemIndex = if (currentChestItem is ElytraItem) {
+            val currentChestItemStack = client.player!!.inventory.getStack(INVENTORY_CHEST_INDEX)
+            val currentChestGliderComponent = currentChestItemStack.get(DataComponentTypes.GLIDER)
+            
+            val inventoryItemIndex = if (currentChestGliderComponent != null) {
                 client.player!!.inventory.indexOfFirstInRange(INVENTORY_AND_HOTBAR_RANGE, fun(stack): Boolean {
-                    val item = stack.item
-                    return item is ArmorItem && item.slotType == EquipmentSlot.CHEST
+                    val equipComponent = stack.get(DataComponentTypes.EQUIPPABLE)
+                    return equipComponent?.slot == EquipmentSlot.CHEST
                 })
             } else {
                 client.player!!.inventory.indexOfFirstInRange(INVENTORY_AND_HOTBAR_RANGE, fun(stack): Boolean {
-                    val item = stack.item
-                    return item is ElytraItem
+                    return stack.get(DataComponentTypes.GLIDER) != null
                 })
             }
 
@@ -67,17 +68,15 @@ class InventoryUtil {
             val currentStack = client.player!!.inventory.getStack(client.player!!.inventory!!.selectedSlot)
 
             if (config.autoToolConfig.prioritizeHigherMiningLevelTools) {
-                findAndSwapToHighest(client, fun(stack): Int {
-                    val item = stack.item
-                    // Item is not a tool -> not a match.
-                    if (item !is MiningToolItem) return -1
+                findAndSwapToHighest(client, fun(stack): Float {
+                    val toolComponent = stack.get(DataComponentTypes.TOOL) ?: return Float.NEGATIVE_INFINITY
 
                     return if (isSuitableSilkTouchItemStack(
                             stack,
                             currentStack,
                             matchToolType
                         )
-                    ) item.material.miningLevel else -1
+                    ) toolComponent.defaultMiningSpeed() else Float.NEGATIVE_INFINITY
                 })
             } else {
                 findAndSwapTo(client, fun(stack): Boolean {
@@ -96,14 +95,17 @@ class InventoryUtil {
 
             val item = stack.item
             // Item is not a tool -> not a match.
-            if (item !is MiningToolItem) return false
+            stack.get(DataComponentTypes.TOOL) ?: return false
 
-            if (currentTool is MiningToolItem) {
+            var currentToolComponent: ToolComponent? = currentStack.get(DataComponentTypes.TOOL)
+
+            if (currentToolComponent != null) {
                 //We are currently holding a tool.
 
                 //If matchToolType is true, check if the item is the same tool as the one we are holding,
                 if (matchToolType && currentTool.javaClass != stack.item.javaClass)
                     return false
+
 
                 //We want to swap from Silk Touch to non-Silk Touch and vice versa.
                 if (matchToolType && stack.hasSilkTouch() == currentStack.hasSilkTouch())
@@ -114,10 +116,7 @@ class InventoryUtil {
 
                 return true
             } else {
-                //We are currently not holding a tool, so no match if matchToolType is true.
-                if (matchToolType)
-                    return false
-
+                //We are currently not holding a tool, so we can't match tool type, just grab something with silk touch
                 if (!stack.hasSilkTouch())
                     return false
 
@@ -127,7 +126,6 @@ class InventoryUtil {
 
         fun autoTool(client: MinecraftClient) {
             val config = Config.getConfig()
-
             val entity = client.getCameraEntity()
             val blockHit = entity?.raycast(20.0, 0.0f, false)
 
@@ -143,18 +141,16 @@ class InventoryUtil {
                 }
 
                 if (config.autoToolConfig.prioritizeHigherMiningLevelTools) {
-                    findAndSwapToHighest(client, fun(stack): Int {
-                        val item = stack.item
-                        if (item is MiningToolItem && item.isSuitableFor(blockState)) {
-                            return item.material.miningLevel
+                    findAndSwapToHighest(client, fun(stack): Float {
+                        if (stack.isSuitableFor(blockState)) {
+                            return stack.getMiningSpeedMultiplier(blockState)
                         }
 
-                        return -1
+                        return -1.0f
                     })
                 } else {
                     findAndSwapTo(client, fun(stack): Boolean {
-                        val item = stack.item
-                        return item is MiningToolItem && item.isSuitableFor(blockState)
+                        return stack.isSuitableFor(blockState)
                     })
                 }
             }
@@ -162,8 +158,6 @@ class InventoryUtil {
 
         fun findAndSwapTo(client: MinecraftClient, predicate: (itemStack: ItemStack) -> Boolean) {
             val config = Config.getConfig()
-            val selectedIndex = client.player!!.inventory!!.selectedSlot
-            //val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
 
             var screenItemIndex = -1
 
@@ -189,7 +183,7 @@ class InventoryUtil {
             }
         }
 
-        fun findAndSwapToHighest(client: MinecraftClient, predicate: (itemStack: ItemStack) -> Int) {
+        fun findAndSwapToHighest(client: MinecraftClient, predicate: (itemStack: ItemStack) -> Float) {
             val config = Config.getConfig()
             val selectedIndex = client.player!!.inventory!!.selectedSlot
             val selectedStack = client.player!!.inventory!!.getStack(selectedIndex)
@@ -199,9 +193,9 @@ class InventoryUtil {
             if(config.autoToolConfig.searchHotbarFirst) {
                 screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(
                     SCREEN_HOTBAR_RANGE,
-                    fun(slot): Int {
+                    fun(slot): Float {
                         if (slot.stack == selectedStack)
-                            return -1
+                            return Float.NEGATIVE_INFINITY
 
                         return predicate(slot.stack)
                     })
@@ -210,9 +204,9 @@ class InventoryUtil {
             if(screenItemIndex == -1)
                 screenItemIndex = client.player!!.playerScreenHandler!!.slots.indexOfHighestInRange(
                     SCREEN_INVENTORY_AND_HOTBAR_RANGE,
-                    fun(slot): Int {
+                    fun(slot): Float {
                         if (slot.stack == selectedStack)
-                            return -1
+                            return Float.NEGATIVE_INFINITY
 
                         return predicate(slot.stack)
                     })
@@ -240,7 +234,7 @@ class InventoryUtil {
                 AutoToolTargetSlot.FirstTool -> client.player!!.inventory!!.indexOfFirstInRange(
                     HOTBAR_RANGE,
                     fun(stack): Boolean {
-                        return stack.item is MiningToolItem
+                        return stack.get(DataComponentTypes.TOOL) != null
                     },
                     client.player!!.inventory!!.selectedSlot
                 )

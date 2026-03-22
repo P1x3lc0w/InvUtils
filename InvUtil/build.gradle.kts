@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.config.JvmTarget
+
 plugins {
     id("fabric-loom")
     kotlin("jvm").version(System.getProperty("kotlin_version"))
@@ -21,14 +23,18 @@ dependencies {
     modApi("com.terraformersmc", "modmenu", project.extra["modmenu_version"] as String)
 }
 tasks {
-    val javaVersion = JavaVersion.VERSION_17
+    val javaVersion = JavaVersion.VERSION_21
     withType<JavaCompile> {
         options.encoding = "UTF-8"
         sourceCompatibility = javaVersion.toString()
         targetCompatibility = javaVersion.toString()
         options.release.set(javaVersion.toString().toInt())
     }
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> { kotlinOptions { jvmTarget = javaVersion.toString() } }
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlin {
+
+        }
+    }
     jar { from("LICENSE") { rename { "${it}_${base.archivesName}" } } }
     processResources {
         inputs.property("version", project.version)
