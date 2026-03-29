@@ -1,13 +1,11 @@
 package p1x3lc0w.invutil
 
-import net.minecraft.client.MinecraftClient
-import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.screen.slot.SlotActionType
-import net.minecraft.text.Text
-import kotlin.jvm.optionals.getOrNull
+import net.minecraft.client.Minecraft
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.item.ItemStack
 
-fun PlayerInventory.indexOfFirstInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Boolean, defaultValue: Int = -1): Int {
+fun Inventory.indexOfFirstInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Boolean, defaultValue: Int = -1): Int {
     return this.toList().indexOfFirstInRange(range, predicate, defaultValue)
 }
 
@@ -19,7 +17,7 @@ fun <T> List<T>.indexOfFirstInRange(range: IntRange, predicate: (item: T) -> Boo
     return defaultValue
 }
 
-fun PlayerInventory.indexOfHighestInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Float): Int {
+fun Inventory.indexOfHighestInRange(range: IntRange, predicate: (itemStack: ItemStack) -> Float): Int {
     return this.toList().indexOfHighestInRange(range, predicate)
 }
 
@@ -55,11 +53,11 @@ fun <T> List<T>.indexOfHighestInRange(range: IntRange, predicate: (item: T) -> F
 */
 //NOTE: Source id is from screen slots (see above), while destination id is from combined inventory (see above)
 //NOTE/FIXME: using an armor sloat as destination will break, see implementation.
-fun MinecraftClient.swapPlayerInventorySlots(source: Int, destination: Int) {
+fun Minecraft.swapPlayerInventorySlots(source: Int, destination: Int) {
     //player?.sendMessage(Text.literal("SWAP: ${source}; $destination"), false)
     if(destination < 9 || destination == 40) {
-        interactionManager?.clickSlot(
-            player!!.playerScreenHandler!!.syncId, source, destination, SlotActionType.SWAP, player
+        this.gameMode!!.handleContainerInput(
+            player!!.inventoryMenu.containerId, source, destination, ContainerInput.SWAP, player!!
         )
     } else {
         // Not swapping from/to hotbar, so do the swap indirectly via hotbar since
@@ -83,7 +81,7 @@ fun MinecraftClient.swapPlayerInventorySlots(source: Int, destination: Int) {
 }
 
 fun ItemStack.hasSilkTouch(): Boolean {
-    return this.enchantments.enchantments.any {
-        it.key.getOrNull()?.value?.toString() == "minecraft:silk_touch"
+    return this.enchantments.keySet().any {
+        return it.registeredName == "minecraft:silk_touch"
     }
 }

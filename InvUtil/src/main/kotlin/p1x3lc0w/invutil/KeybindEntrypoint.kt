@@ -1,47 +1,47 @@
 package p1x3lc0w.invutil
 
+import com.mojang.blaze3d.platform.InputConstants
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
-import net.minecraft.client.option.KeyBinding
-import net.minecraft.client.util.InputUtil
-import net.minecraft.util.Identifier
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
+import net.minecraft.client.KeyMapping
+import net.minecraft.resources.Identifier
 import org.lwjgl.glfw.GLFW
 
 class KeybindEntrypoint : ClientModInitializer {
     override fun onInitializeClient() {
-        val category = KeyBinding.Category(
-            Identifier.of("p1x3lc0w_invutil","key")
+        val category = KeyMapping.Category(
+            Identifier.tryBuild("p1x3lc0w_invutil","key")!!
         )
 
-        val autoToolKeybind = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
-                "key.p1x3lc0w.invutil.autoTool", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R, category
+        val autoToolKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.p1x3lc0w.invutil.autoTool", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, category
             )
         )
 
-        val swapSilkTouchKeybind = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
-                "key.p1x3lc0w.invutil.swapSilkTouch", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, category
+        val swapSilkTouchKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.p1x3lc0w.invutil.swapSilkTouch", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, category
             )
         )
 
-        val swapElytraKeybind = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
-                "key.p1x3lc0w.invutil.swapElytra", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, category
+        val swapElytraKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.p1x3lc0w.invutil.swapElytra", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, category
             )
         )
 
         ClientTickEvents.END_CLIENT_TICK.register(fun(client) {
-            while (autoToolKeybind.wasPressed()) {
+            while (autoToolKeybind.consumeClick()) {
                 InventoryUtil.autoTool(client)
             }
 
-            while (swapSilkTouchKeybind.wasPressed()) {
+            while (swapSilkTouchKeybind.consumeClick()) {
                 InventoryUtil.swapSilkTouch(client)
             }
 
-            while (swapElytraKeybind.wasPressed()) {
+            while (swapElytraKeybind.consumeClick()) {
                 InventoryUtil.swapElytra(client)
             }
         })

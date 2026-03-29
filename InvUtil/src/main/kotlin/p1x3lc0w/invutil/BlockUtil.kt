@@ -1,7 +1,7 @@
 package p1x3lc0w.invutil
 
-import net.minecraft.block.Block
-import net.minecraft.registry.Registries
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.world.level.block.Block;
 
 class BlockUtil {
     companion object {
@@ -48,11 +48,12 @@ class BlockUtil {
         )
 
         fun isGlass(block: Block): Boolean {
-            return GLASS_BLOCKS.contains(Registries.BLOCK.getId(block).toString())
+            println(BuiltInRegistries.BLOCK.getKey(block).toString())
+            return GLASS_BLOCKS.contains(BuiltInRegistries.BLOCK.getKey(block).toString())
         }
 
         fun isEnderChest(block: Block): Boolean {
-            return ENDER_CHEST_BLOCKS.contains(Registries.BLOCK.getId(block).toString())
+            return ENDER_CHEST_BLOCKS.contains(BuiltInRegistries.BLOCK.getKey(block).toString())
         }
     }
 }

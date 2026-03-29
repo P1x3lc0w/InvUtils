@@ -2,9 +2,10 @@ package p1x3lc0w.invutil.optional.clothconfig
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import me.shedaniel.autoconfig.AutoConfig
+import me.shedaniel.autoconfig.AutoConfigClient
 import me.shedaniel.autoconfig.annotation.Config
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer
-import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.screens.Screen
 import p1x3lc0w.invutil.config.IInvUtilConfig
 
 class ClothConfigUtil {
@@ -23,12 +24,12 @@ class ClothConfigUtil {
                 registerConfig()
 
             return ConfigScreenFactory { parent: Screen? ->
-                AutoConfig.getConfigScreen(InvUtilClothConfigData::class.java, parent).get()
+                AutoConfigClient.getConfigScreen(InvUtilClothConfigData::class.java, parent).get()
             }
         }
 
         private fun registerConfig() {
-            val registry = AutoConfig.getGuiRegistry(InvUtilClothConfigData::class.java)
+            val registry = AutoConfigClient.getGuiRegistry(InvUtilClothConfigData::class.java)
             registry.registerPredicateTransformer(DropdownTransformer()) { true }
 
             AutoConfig.register(InvUtilClothConfigData::class.java) { definition: Config?, configClass: Class<InvUtilClothConfigData?>? ->
