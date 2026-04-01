@@ -6,7 +6,7 @@ plugins {
 	id("org.jetbrains.kotlin.jvm") version "2.3.20"
 }
 
-version = providers.gradleProperty("mod_version").get()
+version = "${providers.gradleProperty("mod_version").get()}+mc${providers.gradleProperty("minecraft_version").get()}"
 group = providers.gradleProperty("maven_group").get()
 
 base {
