@@ -48,7 +48,6 @@ class BlockUtil {
         )
 
         fun isGlass(block: Block): Boolean {
-            println(BuiltInRegistries.BLOCK.getKey(block).toString())
             return GLASS_BLOCKS.contains(BuiltInRegistries.BLOCK.getKey(block).toString())
         }
 
